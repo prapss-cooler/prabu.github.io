@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Evolution Speed</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #000428, #004e92);
+            overflow: hidden;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Solar System Styles */
+        .solar-system {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            perspective: 800px;
+            margin-bottom: 50px;
+        }
+
+        .star {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ffdd44, #ff8800);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px rgba(255, 136, 0, 0.8);
+        }
+
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: rotate 10s linear infinite;
+        }
+
+        .planet {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #29abe2, #1769aa);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg);
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Calculator Styles */
+        .calculator {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        .calculator input,
+        .calculator button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .calculator input {
+            background: #fff;
+            color: #333;
+        }
+        .calculator button {
+            background: #ff8800;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .calculator button:hover {
+            background: #f57c00;
+        }
+    </style>
+</head>
+<body>
+    <div class="solar-system">
+        <div class="star"></div>
+        <div class="orbit" id="orbit" style="width: 300px; height: 300px;">
+            <div class="planet"></div>
+        </div>
+    </div>
+
+    <div class="calculator">
+        <input type="number" id="radius" placeholder="Orbit Radius (km)">
+        <input type="number" id="time" placeholder="Revolution Time (hours)">
+        <button onclick="calculateSpeed()">Calculate Speed</button>
+        <p id="result">Speed: </p>
+    </div>
+
+    <script>
+        function calculateSpeed() {
+            const radius = parseFloat(document.getElementById('radius').value);
+            const time = parseFloat(document.getElementById('time').value);
+            let result;
+
+            if (isNaN(radius) || isNaN(time) || time <= 0 || radius <= 0) {
+                result = "Please enter valid numbers (radius and time must be greater than 0).";
+            } else {
+                const speed = (2 * Math.PI * radius) / time; // Kecepatan dalam km/jam
+                result = `Speed: ${speed.toFixed(2)} km/h`;
+                
+                // Update ukuran orbit berdasarkan radius
+                const orbit = document.getElementById('orbit');
+                const orbitSize = radius / 1000; // Skala visual untuk radius
+                orbit.style.width = `${orbitSize}px`;
+                orbit.style.height = `${orbitSize}px`;
+
+                // Update durasi animasi berdasarkan waktu revolusi
+                const newDuration = Math.max(1, time / 10); // Skala visual untuk durasi
+                orbit.style.animation = `rotate ${newDuration}s linear infinite`;
+            }
+
+            document.getElementById('result').textContent = result;
+        }
+    </script>
+</body>
+</html>

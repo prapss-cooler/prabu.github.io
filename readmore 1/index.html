@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Cuaca BMKG 3D</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .calculator-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            text-align: center;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 200px;
+            font-size: 16px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Kalkulator Input -->
+    <div class="calculator-container">
+        <h1>Kalkulator Cuaca BMKG</h1>
+        <label for="temperature">Temperatur (°C):</label>
+        <input type="number" id="temperature" class="input-field" placeholder="Masukkan suhu dalam Celcius">
+        <br>
+        <label for="humidity">Kelembapan (%):</label>
+        <input type="number" id="humidity" class="input-field" placeholder="Masukkan kelembapan dalam persentase">
+        <br>
+        <label for="windSpeed">Kecepatan Angin (m/s):</label>
+        <input type="number" id="windSpeed" class="input-field" placeholder="Masukkan kecepatan angin dalam m/s">
+        <br>
+        <button class="button" onclick="calculateWeather()">Hitung Cuaca</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <!-- Three.js Canvas untuk 3D -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        let scene, camera, renderer, particles = [];
+
+        // Setup Three.js scene
+        function setup3DScene() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas') });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            camera.position.z = 50;
+        }
+
+        // Fungsi untuk membuat partikel hujan
+        function createRain() {
+            const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+            for (let i = 0; i < 200; i++) {
+                let raindrop = new THREE.Mesh(geometry, material);
+                raindrop.position.set(Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50);
+                scene.add(raindrop);
+                particles.push(raindrop);
+            }
+        }
+
+        // Fungsi untuk membuat partikel salju
+        function createSnow() {
+            const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            for (let i = 0; i < 100; i++) {
+                let snowflake = new THREE.Mesh(geometry, material);
+                snowflake.position.set(Math.random() * 100 - 50, Math.random() * 100 - 50, Math.random() * 100 - 50);
+                scene.add(snowflake);
+                particles.push(snowflake);
+            }
+        }
+
+        // Update partikel (gerakkan hujan/salju)
+        function animateParticles() {
+            particles.forEach(particle => {
+                particle.position.y -= 0.5;
+                if (particle.position.y < -50) {
+                    particle.position.y = 50;
+                }
+            });
+        }
+
+        // Fungsi untuk melakukan kalkulasi cuaca
+        function calculateWeather() {
+            // Ambil nilai input
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+
+            // Validasi input
+            if (isNaN(temperature) || isNaN(humidity) || isNaN(windSpeed)) {
+                document.getElementById('result').innerText = 'Tolong masukkan nilai yang valid!';
+                return;
+            }
+
+            // Menampilkan hasil
+            document.getElementById('result').innerText = `Heat Index: ${calculateHeatIndex(temperature, humidity).toFixed(2)} °C`;
+
+            // Hapus partikel sebelumnya
+            particles.forEach(particle => scene.remove(particle));
+            particles = [];
+
+            // Membuat efek cuaca berdasarkan suhu
+            if (temperature > 25) {
+                createRain();
+            } else if (temperature <= 0) {
+                createSnow();
+            }
+        }
+
+        // Rumus Heat Index
+        function calculateHeatIndex(temp, hum) {
+            const c1 = -8.78469475556;
+            const c2 = 1.61139411;
+            const c3 = 2.33854883889;
+            const c4 = -0.14611605;
+            const c5 = -0.012308094;
+            const c6 = -0.0164248277778;
+            const c7 = 0.002211732;
+            const c8 = 0.00072546;
+            const c9 = -0.000003582;
+
+            return c1 + (c2 * temp) + (c3 * hum) + (c4 * temp * hum) +
+                   (c5 * Math.pow(temp, 2)) + (c6 * Math.pow(hum, 2)) +
+                   (c7 * Math.pow(temp, 2) * hum) + (c8 * temp * Math.pow(hum, 2)) +
+                   (c9 * Math.pow(temp, 2) * Math.pow(hum, 2));
+        }
+
+        // Fungsi animasi untuk memperbarui scene
+        function animate() {
+            requestAnimationFrame(animate);
+            animateParticles();
+            renderer.render(scene, camera);
+        }
+
+        // Setup dan mulai animasi
+        setup3DScene();
+        animate();
+
+    </script>
+</body>
+</html>
