@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Orbit Simulator</title>
+    <title>Planetary Orbit</title>
     <style>
+        /* General Styles */
         body {
             margin: 0;
             height: 100vh;
@@ -12,26 +13,31 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle, #000428, #004e92);
+            background: radial-gradient(circle, #001f3f, #003366);
+            overflow: hidden;
             color: #fff;
             font-family: Arial, sans-serif;
         }
-        .solar-system {
+
+        .system {
             position: relative;
             width: 600px;
             height: 600px;
+            perspective: 800px;
         }
-        .star {
+
+        .planet-center {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, #ffdd44, #ff8800);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #6b8e23, #2f4f4f);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 30px rgba(255, 136, 0, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
         }
+
         .orbit {
             position: absolute;
             top: 50%;
@@ -39,8 +45,10 @@
             border: 1px dashed rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             transform: translate(-50%, -50%);
+            animation: rotate 10s linear infinite;
         }
-        .planet {
+
+        .orbiting-planet {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -48,25 +56,28 @@
             height: 30px;
             background: radial-gradient(circle, #29abe2, #1769aa);
             border-radius: 50%;
-            transform-origin: 150px 0;
-            animation: orbit 10s linear infinite;
+            transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg);
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
         }
-        @keyframes orbit {
-            from {
-                transform: rotate(0deg);
+
+        @keyframes rotate {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
             }
-            to {
-                transform: rotate(360deg);
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
             }
         }
+
         .calculator {
-            margin-top: 20px;
             width: 300px;
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            margin-top: 20px;
         }
+
         .calculator input,
         .calculator button {
             width: 100%;
@@ -76,63 +87,68 @@
             border-radius: 5px;
             font-size: 1rem;
         }
+
         .calculator input {
             background: #fff;
             color: #333;
         }
+
         .calculator button {
             background: #ff8800;
             color: #fff;
             cursor: pointer;
             transition: background 0.3s;
         }
+
         .calculator button:hover {
             background: #f57c00;
+        }
+
+        #result {
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="solar-system">
-        <div class="star"></div>
+    <div class="system">
+        <div class="planet-center"></div>
         <div class="orbit" id="orbit">
-            <div class="planet" id="planet"></div>
+            <div class="orbiting-planet"></div>
         </div>
     </div>
 
     <div class="calculator">
         <input type="number" id="radius" placeholder="Orbit Radius (km)">
         <input type="number" id="mass" placeholder="Planet Mass (kg)">
-        <button onclick="updateOrbit()">Update Orbit</button>
-        <p id="result">Orbit Speed and Parameters will appear here.</p>
+        <button onclick="calculateOrbit()">Calculate Orbit</button>
+        <p id="result">Orbit Speed and Revolution Time will appear here.</p>
     </div>
 
     <script>
-        function updateOrbit() {
+        function calculateOrbit() {
             const radius = parseFloat(document.getElementById('radius').value);
             const mass = parseFloat(document.getElementById('mass').value);
-            const orbit = document.getElementById('orbit');
-            const planet = document.getElementById('planet');
-            let result;
+            const G = 6.67430e-11; // Gravitational constant
+
+            let resultText;
 
             if (isNaN(radius) || isNaN(mass) || radius <= 0 || mass <= 0) {
-                result = "Please enter valid numbers (radius and mass must be greater than 0).";
+                resultText = "Please enter valid positive numbers for radius and mass.";
             } else {
-                const speed = Math.sqrt((6.67430e-11 * 1.989e30) / (radius * 1000)); // Kecepatan orbit (m/s)
-                const duration = (2 * Math.PI * radius * 1000) / speed; // Waktu revolusi (s)
+                const speed = Math.sqrt(G * mass / radius); // Orbital speed (m/s)
+                const time = (2 * Math.PI * radius) / speed; // Orbital period (seconds)
+                
+                // Update orbit size and animation duration
+                const orbit = document.getElementById('orbit');
+                orbit.style.width = `${radius / 1000}px`;
+                orbit.style.height = `${radius / 1000}px`;
+                orbit.style.animation = `rotate ${time / 10}s linear infinite`;
 
-                const orbitSize = radius / 1000; // Skala visual untuk radius
-                orbit.style.width = `${orbitSize}px`;
-                orbit.style.height = `${orbitSize}px`;
-
-                const newDuration = duration / 100; // Skala animasi untuk durasi
-                planet.style.animationDuration = `${newDuration}s`;
-
-                result = `Speed: ${(speed / 1000).toFixed(2)} km/s<br>
-                          Revolution Time: ${(duration / 3600).toFixed(2)} hours<br>
-                          Mass: ${mass.toFixed(2)} kg`;
+                resultText = `Orbit Speed: ${(speed / 1000).toFixed(2)} km/s, Revolution Time: ${(time / 3600).toFixed(2)} hours.`;
             }
 
-            document.getElementById('result').innerHTML = result;
+            document.getElementById('result').textContent = resultText;
         }
     </script>
 </body>
