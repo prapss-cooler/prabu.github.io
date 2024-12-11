@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Revolution Calculator</title>
+    <title>Planet Orbit</title>
     <style>
         /* General Styles */
         body {
@@ -14,7 +14,6 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle, #000428, #004e92);
-            overflow: hidden;
             color: #fff;
             font-family: Arial, sans-serif;
         }
@@ -27,7 +26,7 @@
             margin-bottom: 50px;
         }
 
-        .star {
+        .sun {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -52,16 +51,16 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 30px;
-            height: 30px;
+            width: 20px;
+            height: 20px;
             background: radial-gradient(circle, #29abe2, #1769aa);
             border-radius: 50%;
-            transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg);
+            transform: translate(-50%, -50%) rotate(0deg) translateX(150px);
             box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
-            animation: rotate 10s linear infinite;
+            animation: orbit 10s linear infinite;
         }
 
-        @keyframes rotate {
+        @keyframes orbit {
             0% {
                 transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg);
             }
@@ -104,41 +103,40 @@
 </head>
 <body>
     <div class="solar-system">
-        <div class="star"></div>
-        <div class="orbit" id="orbit">
+        <div class="sun"></div>
+        <div class="orbit" id="orbit" style="width: 300px; height: 300px;">
             <div class="planet" id="planet"></div>
         </div>
     </div>
 
     <div class="calculator">
         <input type="number" id="radius" placeholder="Orbit Radius (km)">
-        <input type="number" id="time" placeholder="Revolution Time (hours)">
-        <button onclick="calculateOrbit()">Calculate Orbit</button>
-        <p id="result">Speed: </p>
+        <input type="number" id="time" placeholder="Revolution Time (seconds)">
+        <button onclick="updateOrbit()">Update Orbit</button>
+        <p id="result">Current Speed: </p>
     </div>
 
     <script>
-        function calculateOrbit() {
+        function updateOrbit() {
             const radius = parseFloat(document.getElementById('radius').value);
             const time = parseFloat(document.getElementById('time').value);
             const orbit = document.getElementById('orbit');
             const planet = document.getElementById('planet');
             let result;
 
-            if (isNaN(radius) || isNaN(time) || time <= 0 || radius <= 0) {
+            if (isNaN(radius) || isNaN(time) || radius <= 0 || time <= 0) {
                 result = "Please enter valid numbers (radius and time must be greater than 0).";
             } else {
-                const speed = (2 * Math.PI * radius) / time; // Speed in km/h
-                result = `Speed: ${speed.toFixed(2)} km/h`;
-
                 // Update orbit size based on radius
-                const orbitSize = radius / 1000; // Scale down for visual effect
-                orbit.style.width = `${orbitSize}px`;
-                orbit.style.height = `${orbitSize}px`;
+                const scaledRadius = radius / 1000; // Scale for display
+                orbit.style.width = `${scaledRadius}px`;
+                orbit.style.height = `${scaledRadius}px`;
 
-                // Update animation duration based on revolution time
-                const newDuration = Math.max(1, time / 10); // Scale down for animation
-                planet.style.animation = `rotate ${newDuration}s linear infinite`;
+                // Update animation duration based on time
+                const speed = (2 * Math.PI * radius) / time; // Speed in km/s
+                planet.style.animationDuration = `${time}s`;
+
+                result = `Current Speed: ${speed.toFixed(2)} km/s`;
             }
 
             document.getElementById('result').textContent = result;
