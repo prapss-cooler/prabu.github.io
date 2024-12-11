@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Revolution Speed</title>
+    <title>Planet Revolution Calculator</title>
     <style>
         /* General Styles */
         body {
@@ -14,9 +14,9 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle, #000428, #004e92);
+            overflow: hidden;
             color: #fff;
             font-family: Arial, sans-serif;
-            overflow: hidden;
         }
 
         /* Solar System Styles */
@@ -24,6 +24,7 @@
             position: relative;
             width: 600px;
             height: 600px;
+            margin-bottom: 50px;
         }
 
         .star {
@@ -55,17 +56,17 @@
             height: 30px;
             background: radial-gradient(circle, #29abe2, #1769aa);
             border-radius: 50%;
-            transform-origin: 150px center; /* Default radius */
-            animation: rotate 10s linear infinite;
+            transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg);
             box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
+            animation: rotate 10s linear infinite;
         }
 
         @keyframes rotate {
             0% {
-                transform: rotate(0deg);
+                transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg);
             }
             100% {
-                transform: rotate(360deg);
+                transform: translate(-50%, -50%) rotate(360deg) translateX(150px) rotate(-360deg);
             }
         }
 
@@ -76,9 +77,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-            text-align: center;
         }
-
         .calculator input,
         .calculator button {
             width: 100%;
@@ -88,32 +87,25 @@
             border-radius: 5px;
             font-size: 1rem;
         }
-
         .calculator input {
             background: #fff;
             color: #333;
         }
-
         .calculator button {
             background: #ff8800;
             color: #fff;
             cursor: pointer;
             transition: background 0.3s;
         }
-
         .calculator button:hover {
             background: #f57c00;
-        }
-
-        .calculator p {
-            margin: 0;
         }
     </style>
 </head>
 <body>
     <div class="solar-system">
         <div class="star"></div>
-        <div class="orbit" id="orbit" style="width: 300px; height: 300px;">
+        <div class="orbit" id="orbit">
             <div class="planet" id="planet"></div>
         </div>
     </div>
@@ -121,14 +113,16 @@
     <div class="calculator">
         <input type="number" id="radius" placeholder="Orbit Radius (km)">
         <input type="number" id="time" placeholder="Revolution Time (hours)">
-        <button onclick="calculateSpeed()">Calculate Speed</button>
+        <button onclick="calculateOrbit()">Calculate Orbit</button>
         <p id="result">Speed: </p>
     </div>
 
     <script>
-        function calculateSpeed() {
+        function calculateOrbit() {
             const radius = parseFloat(document.getElementById('radius').value);
             const time = parseFloat(document.getElementById('time').value);
+            const orbit = document.getElementById('orbit');
+            const planet = document.getElementById('planet');
             let result;
 
             if (isNaN(radius) || isNaN(time) || time <= 0 || radius <= 0) {
@@ -137,20 +131,14 @@
                 const speed = (2 * Math.PI * radius) / time; // Speed in km/h
                 result = `Speed: ${speed.toFixed(2)} km/h`;
 
-                // Update orbit size
-                const orbit = document.getElementById('orbit');
-                const orbitSize = radius / 1000; // Scale visual for radius
+                // Update orbit size based on radius
+                const orbitSize = radius / 1000; // Scale down for visual effect
                 orbit.style.width = `${orbitSize}px`;
                 orbit.style.height = `${orbitSize}px`;
 
-                // Update planet transform-origin
-                const planet = document.getElementById('planet');
-                const scaledRadius = orbitSize / 2; // Orbit diameter to radius
-                planet.style.transformOrigin = `${scaledRadius}px center`;
-
                 // Update animation duration based on revolution time
-                const newDuration = Math.max(1, time / 10); // Scale visual for duration
-                planet.style.animationDuration = `${newDuration}s`;
+                const newDuration = Math.max(1, time / 10); // Scale down for animation
+                planet.style.animation = `rotate ${newDuration}s linear infinite`;
             }
 
             document.getElementById('result').textContent = result;
